@@ -6,7 +6,7 @@
 // tester a 500 pour les intervals
 // test
 // faire les commentaires
-// faire le README et ajouter option play et title
+// faire le README et ajouter option play et title effectSpeed
 //faire la license
 // faire le  bower
 
@@ -24,6 +24,7 @@
 function Tekitizy (selector, options) {
   this.selector = selector
   this.opts = {}
+  this.nbImages = 0
   this.checkOpts(options)
 }
 
@@ -69,7 +70,7 @@ Tekitizy.prototype.checkOpts = function (opts) {
     } else {
       this.opts.play = true
     }
-    if (opts.hasOwnProperty('title') && typeof opts.play === 'boolean') {
+    if (opts.hasOwnProperty('title') && typeof opts.title === 'boolean') {
       this.opts.title = opts.title
     } else {
       this.opts.title = true
@@ -100,10 +101,9 @@ Tekitizy.setup = function (JQuery, imgSelector, opts) {
 
 Tekitizy.prototype.setup = function () {
   this.drawCarroussel(this.opts.carroussel_id)
-
-
   this.appendZoomBtn(this.selector, this.clickZoomBtn)
   this.listenToButtons()
+  this.playTekitizy()
   // ...
 }
 
@@ -131,12 +131,9 @@ Tekitizy.prototype.drawCarroussel = function (id) {
   var carousel = ''
 
   carousel = '<div class="tekitizy-carroussel" id=' + id + '>'
-
-
   carousel += this.appendButtons(carousel) // ajout boutons
   carousel += this.createImageContainer(carousel) // création du container d'image
   carousel += '</div>'
-
   this.carousel = $(carousel)
   this.carousel.appendTo($('body'))
 }
@@ -146,34 +143,36 @@ Tekitizy.prototype.drawCarroussel = function (id) {
  */
 Tekitizy.prototype.appendButtons() = function () {
   var buttons = ''
-  buttons += this.CloseBtn()
+
+  buttons += this.closeBtn()
   if (this.opts.play === true) {
-    buttons += this PlayBtn()
+    buttons += this playBtn()
   } else {
-    buttons += this.PauseBtn()
+    buttons += this.pauseBtn()
   }
   if (this.opts.prevNext === true) {
-    buttons += this.NextPrevBtn()
+    buttons += this.nextPrevBtn()
   }
   // a retirer
   console.log('apendBouttons', buttons)
   return buttons
 }
 
-Tekitizy.prototype.CloseBtn() = function () {
+Tekitizy.prototype.closeBtn() = function () {
   return ('<i class="fa fa-close tekitizy-icon tekitizy-close-btn"></i>')
 }
 
-Tekitizy.prototype.PlayBtn() = function () {
+Tekitizy.prototype.playBtn() = function () {
   return ('<i class="fa fa-play tekitizy-icon tekitizy-play-btn"></i>')
 }
 
-Tekitizy.prototype.PauseBtn() = function () {
-  return (' <i class="fa fa-pause tekitizy-icon tekitizy-pause-btn"></i>')
+Tekitizy.prototype.pauseBtn() = function () {
+  return ('<i class="fa fa-pause tekitizy-icon tekitizy-pause-btn"></i>')
 }
 
-Tekitizy.prototype.NextPrevBtn = function () {
+Tekitizy.prototype.nextPrevBtn = function () {
   var buttons = ''
+
   buttons += '<i class="fa fa-angle-left tekitizy-icon tekitizy-prev-btn"></i>'
   buttons += '<i class="fa fa-angle-right tekitizy-icon tekitizy-next-btn"></i>'
   return buttons
@@ -193,6 +192,7 @@ Tekitizy.prototype.createImageContainer = function () {
 // NECESSAIRE ?????
 Tekitizy.prototype.sizeWidth = function () {
   var width = $(window).width() / 2
+
   $('.tekitizy-image_content').each(function() {
     $(this).width(width)
   })
@@ -212,6 +212,7 @@ Tekitizy.prototype.listenToButtons = function () {
 
 Tekitizy.prototype.responsiveWindow = function () {
   var tek = this
+
   $(window).on('resize', function () {
     tek.sizeWidth()
   })
@@ -219,6 +220,7 @@ Tekitizy.prototype.responsiveWindow = function () {
 
 Tekitizy.prototype.listenToButtonOpen = function () {
   var tek = this
+
   $('.tekitizy-open-btn').on('click', function () {
     tek.actionShow($(this).attr('data-src'), $(this).attr('data-index'))
   })
@@ -226,6 +228,7 @@ Tekitizy.prototype.listenToButtonOpen = function () {
 
 Tekitizy.prototype.listenToButtonClose = function () {
   var tek = this
+
   $('.tekitizy-close-btn').on('click', function (){
     tek.actionClose()
     tek.actionPause()
@@ -234,6 +237,7 @@ Tekitizy.prototype.listenToButtonClose = function () {
 
 Tekitizy.prototype.listenToButtonPlay = function () {
   var tek = this
+
   $('.tekitizy-play-btn').on('click', function () {
     tek.actionPlay()
   })
@@ -241,6 +245,7 @@ Tekitizy.prototype.listenToButtonPlay = function () {
 
 Tekitizy.prototype.listenToButtonPause = function () {
   var tek = this
+
   $('.tekitizy-pause-btn').on('click', function () {
     tek.actionPause()
   })
@@ -248,6 +253,7 @@ Tekitizy.prototype.listenToButtonPause = function () {
 
 Tekitizy.prototype.listenToButtonNext = function () {
   var tek = this
+
   $('.tekitizy-next-btn').on('click', function () {
     if (!$(this).hasClass('swipe')) {
       $(this).addClass('swipe')
@@ -262,6 +268,7 @@ Tekitizy.prototype.listenToButtonNext = function () {
 
 Tekitizy.prototype.listenToButtonPrev = function () {
   var tek = this
+
   $('.tekitizy-prev-btn').on('click', function () {
     if (!$(this).hasClass('swipe')) {
       $(this).addClass('swipe')
@@ -279,6 +286,7 @@ Tekitizy.prototype.listenToButtonPrev = function () {
 // affiche une image
 Tekitizy.prototype.actionShow = function (src, i) {
   var tek = this
+
   this.nbImages = 0;
   $('.tekitizy-container').each(function($i) {
     var img = $(this).children('img').attr('src')
@@ -287,8 +295,8 @@ Tekitizy.prototype.actionShow = function (src, i) {
     tek.nbImages++;
     }
   })
-  this.caroussel.addClass('tekitizy-carroussel-open')
   this.sizeWidth()
+  this.caroussel.addClass('tekitizy-carroussel-open')
 }
 
 Tekitizy.prototype.createImage = function (img, title, i, $i) {
@@ -308,29 +316,85 @@ Tekitizy.prototype.createImage = function (img, title, i, $i) {
   $('.tekitizy-container_list').append(image_container)
 }
 
-// Image + 1
-// si a la fin, retour à la premiere
-Tekitizy.prototype.actionNext = function () {
-  this.carroussel.addClass('tekit')
+
+Tekitizy.prototype.playTekitizy =  function () {
+  var tek = this
+  if (tek.opts.autoPlay === true) {
+      $('i.tekitizy-play-btn').find('i').remove()
+  }
+
+  setInterval(function () {
+    if (tek.nbImages) {
+      if (tek.opts.autoPlay === true) {
+        tek.actionNext()
+      }
+    }
+  }, tek.opts.imageDuration)
 }
 
-// Image - 1
-// si au début, retour à la derniere image`
-Tekitizy.prototype.actionPrev = function () {
+Tekitizy.prototype.actionNext = function () {
+  var tek = this
+  var current_img = $('.image-active')
+  var next_img
+  var width = $('.tekitizy-image_content').width()
 
+  if(current_img.attr('data-index') === tek.nbImages.toString()) {
+    next_img = $('tekitizy-image-container').find('.tekitizy-image_content').first()
+    next_img.addClass('image-active')
+    if (tek.opts.effect === true) {
+      $(.'tekitizy-image_content').animate({ left: '+=' + width * tek.nbImages })
+    }
+  } else {
+    next_img = current_img.next()
+    next_img.addClass('image-active')
+    if (tek.opts.effect === true) {
+      $(.'tekitizy-image_content').animate({ left: '-=' + width })
+    }
+  }
+  current_img.removeClass('image-active')
+}
+
+Tekitizy.prototype.actionPrev = function () {
+  var tek = this
+  var current_img = $('.image-active')
+  var prev_img
+  var width = $('.tekitizy-image_content').width()
+
+  if (current_img.attr('data-index') === '0') {
+    prev_img = $('.tekitizy-image-container').find('.tekitizy-image_content').last()
+    prev_img.addClass('image-active')
+    if (tek.opts.effect === true) {
+      $('.tekitizy-image_content').animate({ left: '-=' + width * tek.nbImages })
+    }
+  } else {
+    prev_img = current_img.prev()
+    prev_img.addClass('image-active')
+    if (tek.opts.effect === true) {
+      $('.tekitizy-image_content').animate({ left: '+=' + width })
+    }
+  }
+  current_img.removeClass('image-active')
+}
+
+Tekitizy.prototype.actionPause = function () {
+  tek = this
+  this.opts.autoPlay = false
+  $('i.tekitizy-pause-btn').find('i').remove()
+  $('.tekitizy-container').append(tek.playBtn)
+  // <i class="fa fa-pause tekitizy-icon tekitizy-pause-btn"></i>'
 }
 
 // Lance le diaporama
 Tekitizy.prototype.actionPlay = function () {
-
-}
-
-// pause le diaporama
-Tekitizy.prototype.actionPause = function () {
-
+  tek = this
+  this.opts.autoPlay = true
+  $('i.tekitizy-play-btn').find('i').remove()
+  $('.tekitizy-container').append(tek.pauseBtn)
+  // <i class="fa fa-play tekitizy-icon tekitizy-play-btn"></i>'
 }
 
 // suprime l'affichage du carroussel
 Tekitizy.prototype.actionClose = function () {
   this.caroussel.removeClass('tekitizy-carroussel-open')
+  this.carousel.find($('.tekitizy-image-container').empty()
 }
