@@ -1,12 +1,13 @@
 .tekitizy-carroussel {
+  display: none;
   position:fixed;
   width: 100%;
   height: 100%;
   margin: 0;
   top: 0;
   left: 0;
-  background-color: #000;
-  opacity: 0.90;
+  background-color: rgba(0,0,0,.9);
+  z-index: 20;
 }
 
 .tekitizy-carroussel.tekitizy-carroussel-open {
@@ -62,6 +63,19 @@
   -moz-transform: translateX(-50%);
   -o-transform: translateX(-50%);
   transform: translateX(-50%);
+}
+
+.tekitizy-zoom-btn {
+  position: absolute;
+  right: 0;
+  bottom: 20px;
+  z-index: 10;
+  color: #fff;
+  cursor: pointer;
+}
+
+.tekitizy-container2 {
+  position: relative;
 }
 
 .tekitizy-container {

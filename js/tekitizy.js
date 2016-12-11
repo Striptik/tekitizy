@@ -17,15 +17,15 @@
  *  Licensed MIT
 */
 
-
 /*
  * This function creates a new instance of the Tekitizy Library
  */
-function Tekitizy (selector, options) {
+function Tekitizy (jQuery, selector, options) {
   this.selector = selector
   this.opts = {}
   this.nbImages = 0
   this.checkOpts(options)
+  this.$ = jQuery
 }
 
 /*
@@ -79,8 +79,8 @@ Tekitizy.prototype.checkOpts = function (opts) {
     this.opts.carroussel_id = 'tekitizy_carroussel'
     this.opts.prevNext = true
     this.opts.autoPlay = true
-    this.opts.imageDuration = 2
-    this.opts.effect = false
+    this.opts.imageDuration = 5000
+    this.opts.effect = true
     this.opts.thumbnails = false
     this.opts.play = true
     this.opts.title = true
@@ -91,17 +91,19 @@ Tekitizy.prototype.checkOpts = function (opts) {
  * This function permits to access and setup the Tekitizy carousel
  */
 Tekitizy.setup = function (JQuery, imgSelector, opts) {
+
   var $ = JQuery;
   $(document).ready(function () {
+
     var tekitizy
-    tekitizy = new Tekitizy(imgSelector, opts)
+    tekitizy = new Tekitizy(jQuery, imgSelector, opts)
     tekitizy.setup()
   })
 }
 
 Tekitizy.prototype.setup = function () {
-  this.drawCarroussel(this.opts.carroussel_id)
   this.appendZoomBtn(this.selector, this.clickZoomBtn)
+  this.drawCarroussel(this.opts.carroussel_id)
   this.listenToButtons()
   this.playTekitizy()
   // ...
@@ -121,8 +123,8 @@ Tekitizy.prototype.appendZoomBtn = function (selector) {
     i_img = i
     $el.wrap('<div></div>')
       .parent()
-        .addClass('tekitizy-container')
-        .append('<i class="tekitizy-open-btn fa fa-search" data-src="' + image_src + '"  aria-hidden="true"></i>')
+        .addClass('tekitizy-container2')
+        .append('<i class="tekitizy-open-btn fa fa-search tekitizy-zoom-btn" data-src="' + image_src + '"  aria-hidden="true" data-index="' + i + '"></i>')
   })
 }
 
@@ -141,12 +143,12 @@ Tekitizy.prototype.drawCarroussel = function (id) {
 /*
  * Fonction append Boutons to the carroussel container
  */
-Tekitizy.prototype.appendButtons() = function () {
+Tekitizy.prototype.appendButtons = function () {
   var buttons = ''
 
   buttons += this.closeBtn()
   if (this.opts.play === true) {
-    buttons += this playBtn()
+    buttons += this.playBtn()
   } else {
     buttons += this.pauseBtn()
   }
@@ -154,19 +156,18 @@ Tekitizy.prototype.appendButtons() = function () {
     buttons += this.nextPrevBtn()
   }
   // a retirer
-  console.log('apendBouttons', buttons)
   return buttons
 }
 
-Tekitizy.prototype.closeBtn() = function () {
+Tekitizy.prototype.closeBtn = function () {
   return ('<i class="fa fa-close tekitizy-icon tekitizy-close-btn"></i>')
 }
 
-Tekitizy.prototype.playBtn() = function () {
+Tekitizy.prototype.playBtn = function () {
   return ('<i class="fa fa-play tekitizy-icon tekitizy-play-btn"></i>')
 }
 
-Tekitizy.prototype.pauseBtn() = function () {
+Tekitizy.prototype.pauseBtn = function () {
   return ('<i class="fa fa-pause tekitizy-icon tekitizy-pause-btn"></i>')
 }
 
@@ -221,15 +222,17 @@ Tekitizy.prototype.responsiveWindow = function () {
 Tekitizy.prototype.listenToButtonOpen = function () {
   var tek = this
 
-  $('.tekitizy-open-btn').on('click', function () {
-    tek.actionShow($(this).attr('data-src'), $(this).attr('data-index'))
+  tek.$('.tekitizy-open-btn').on('click', function () {
+    var i = tek.$(this).parent().children('img').attr('data-index')
+    //var src = tek.$(this).parent().children('img').attr('src')
+    tek.actionShow(i, tek.$(this).attr('data-index'))
   })
 }
 
 Tekitizy.prototype.listenToButtonClose = function () {
   var tek = this
-
   $('.tekitizy-close-btn').on('click', function (){
+
     tek.actionClose()
     tek.actionPause()
   })
@@ -284,19 +287,22 @@ Tekitizy.prototype.listenToButtonPrev = function () {
 // ACTIONS
 
 // affiche une image
-Tekitizy.prototype.actionShow = function (src, i) {
+Tekitizy.prototype.actionShow = function (img_i, i) {
   var tek = this
 
   this.nbImages = 0;
-  $('.tekitizy-container').each(function($i) {
-    var img = $(this).children('img').attr('src')
-    var title = $(this).children('img').attr('alt')
+  tek.$('.tekitizy-container2').each(function($i) {
+    var img = tek.$(this).children('img').attr('src')
+    if ($i.toString() === img_i) {
+        img.addClass('image-active')
+    }
+    var title = tek.$(this).children('img').attr('alt')
     tek.createImage(img, title, i, $i)
     tek.nbImages++;
-    }
   })
   this.sizeWidth()
-  this.caroussel.addClass('tekitizy-carroussel-open')
+  this.carousel.addClass('tekitizy-carroussel-open')
+  //children('img').addClass('image-active')
 }
 
 Tekitizy.prototype.createImage = function (img, title, i, $i) {
@@ -312,15 +318,14 @@ Tekitizy.prototype.createImage = function (img, title, i, $i) {
     image_container += '<caption class="tekitizy-image_title">' + title + '</caption>'
   }
   image_container += '</figure>'
-  console.log(image_container) // a retirer
-  $('.tekitizy-container_list').append(image_container)
+  this.$('.tekitizy-container_list').append(image_container)
 }
 
 
 Tekitizy.prototype.playTekitizy =  function () {
   var tek = this
   if (tek.opts.autoPlay === true) {
-      $('i.tekitizy-play-btn').find('i').remove()
+      tek.$('i.tekitizy-play-btn').find('i').remove()
   }
 
   setInterval(function () {
@@ -334,21 +339,27 @@ Tekitizy.prototype.playTekitizy =  function () {
 
 Tekitizy.prototype.actionNext = function () {
   var tek = this
-  var current_img = $('.image-active')
+  var current_img = tek.$('.image-active')
   var next_img
-  var width = $('.tekitizy-image_content').width()
+  var width = tek.$('.tekitizy-image_container').width()
+
+  console.log('nb :'+tek.nbImages)
+  console.log('current img :'+current_img.attr('data-index'))
 
   if(current_img.attr('data-index') === tek.nbImages.toString()) {
-    next_img = $('tekitizy-image-container').find('.tekitizy-image_content').first()
+    next_img = tek.$('tekitizy-image-container').find('.tekitizy-image_content').first()
     next_img.addClass('image-active')
     if (tek.opts.effect === true) {
-      $(.'tekitizy-image_content').animate({ left: '+=' + width * tek.nbImages })
+      tek.$('.tekitizy-image_container').animate({ left: '+=' + width * tek.nbImages })
     }
   } else {
+
     next_img = current_img.next()
+    //console.log(next_img)
     next_img.addClass('image-active')
     if (tek.opts.effect === true) {
-      $(.'tekitizy-image_content').animate({ left: '-=' + width })
+
+      tek.$('.tekitizy-image_container').animate({ left: '-=' + width })
     }
   }
   current_img.removeClass('image-active')
@@ -356,21 +367,21 @@ Tekitizy.prototype.actionNext = function () {
 
 Tekitizy.prototype.actionPrev = function () {
   var tek = this
-  var current_img = $('.image-active')
+  var current_img = tek.$('.image-active')
   var prev_img
-  var width = $('.tekitizy-image_content').width()
+  var width = tek.$('.tekitizy-image_container').width()
 
   if (current_img.attr('data-index') === '0') {
-    prev_img = $('.tekitizy-image-container').find('.tekitizy-image_content').last()
+    prev_img = tek.$('.tekitizy-image-container').find('.tekitizy-image_content').last()
     prev_img.addClass('image-active')
     if (tek.opts.effect === true) {
-      $('.tekitizy-image_content').animate({ left: '-=' + width * tek.nbImages })
+      tek.$('.tekitizy-image_container').animate({ left: '-=' + width * tek.nbImages })
     }
   } else {
     prev_img = current_img.prev()
     prev_img.addClass('image-active')
     if (tek.opts.effect === true) {
-      $('.tekitizy-image_content').animate({ left: '+=' + width })
+      tek.$('.tekitizy-image_container').animate({ left: '+=' + width })
     }
   }
   current_img.removeClass('image-active')
@@ -378,9 +389,10 @@ Tekitizy.prototype.actionPrev = function () {
 
 Tekitizy.prototype.actionPause = function () {
   tek = this
+
   this.opts.autoPlay = false
-  $('i.tekitizy-pause-btn').find('i').remove()
-  $('.tekitizy-container').append(tek.playBtn)
+  tek.$('i.tekitizy-pause-btn').find('i').remove()
+  tek.$('.tekitizy-container').append(tek.playBtn)
   // <i class="fa fa-pause tekitizy-icon tekitizy-pause-btn"></i>'
 }
 
@@ -388,13 +400,14 @@ Tekitizy.prototype.actionPause = function () {
 Tekitizy.prototype.actionPlay = function () {
   tek = this
   this.opts.autoPlay = true
-  $('i.tekitizy-play-btn').find('i').remove()
-  $('.tekitizy-container').append(tek.pauseBtn)
+  tek.$('i.tekitizy-play-btn').find('i').remove()
+  tek.$('.tekitizy-container').append(tek.pauseBtn)
   // <i class="fa fa-play tekitizy-icon tekitizy-play-btn"></i>'
 }
 
 // suprime l'affichage du carroussel
 Tekitizy.prototype.actionClose = function () {
-  this.caroussel.removeClass('tekitizy-carroussel-open')
-  this.carousel.find($('.tekitizy-image-container').empty()
+  tek = this
+  this.carousel.removeClass('tekitizy-carroussel-open')
+  this.carousel.find(tek.$('.tekitizy-image-container').remove())
 }
