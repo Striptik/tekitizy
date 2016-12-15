@@ -1,18 +1,17 @@
-// A faire
-// revoir le header du fichier + css
-// test
-// faire les commentaires
-// faire le README et ajouter option play et title effectSpeed
-//faire la license
-// faire le  bower
-
-
 /*
  *  Dynamic Carousel Tekitizy
  *  File : tekitizy.js
  *  Author : Alexandre Simonin & Kevin Loiseleur
  *  Licensed MIT
-*/
+ */
+
+/*
+ *
+ *
+ * {CREATE, CONFIGURE & SETUP}
+ *
+ *
+ */
 
 /*
  * This function creates a new instance of the Tekitizy Library
@@ -85,34 +84,46 @@ Tekitizy.prototype.checkOpts = function (opts) {
 }
 
 /*
- * This function permits to access and setup the Tekitizy carousel
+ * This function is the setup for the carousel
  */
 Tekitizy.setup = function (JQuery, imgSelector, opts) {
   JQuery().ready(function () {
     var tekitizy
+
     tekitizy = new Tekitizy(JQuery, imgSelector, opts)
     tekitizy.setup()
   })
 }
 
+/*
+ * This function permits to access and setup the Tekitizy carousel
+ */
 Tekitizy.prototype.setup = function () {
   this.drawCarroussel(this.opts.carroussel_id)
   this.appendZoomBtn(this.selector, this.clickZoomBtn)
   this.listenToButtons()
   this.playTekitizy()
-
 }
 
+/*
+ *
+ *
+ * {DRAWER}
+ *
+ *
+ */
 
+/*
+ * This function permits to append the zoom button on each image selected by the selector
+ */
 Tekitizy.prototype.appendZoomBtn = function (selector) {
   var tek = this
+
   this.$(selector).each(function (i) {
-    // image
     var $el, image_src, alt
     $el = tek.$(this)
     image_src = $el.attr('src')
     alt = $el.attr('alt')
-    i_img = i
     $el.wrap('<div></div>')
       .parent()
         .addClass('tekitizy-container2')
@@ -120,7 +131,9 @@ Tekitizy.prototype.appendZoomBtn = function (selector) {
   })
 }
 
-// CREATION GRAPHIQUE DU CARROUSSEL
+/*
+ * This function permits to draw thw html structure for the carousel
+ */
 Tekitizy.prototype.drawCarroussel = function (id) {
   var tek = this
   var carousel = ''
@@ -148,18 +161,30 @@ Tekitizy.prototype.appendButtons = function () {
   return buttons
 }
 
+/*
+ * This function return the close html button
+ */
 Tekitizy.prototype.closeBtn = function () {
   return ('<i class="fa fa-close tekitizy-icon tekitizy-close-btn"></i>')
 }
 
+/*
+ * This function return the play html button
+ */
 Tekitizy.prototype.playBtn = function () {
   return ('<i class="fa fa-play tekitizy-icon tekitizy-play-btn"></i>')
 }
 
+/*
+ * This function return the pause html button
+ */
 Tekitizy.prototype.pauseBtn = function () {
   return ('<i class="fa fa-pause tekitizy-icon tekitizy-pause-btn"></i>')
 }
 
+/*
+ * This function return the next html button
+ */
 Tekitizy.prototype.nextPrevBtn = function () {
   var buttons = ''
 
@@ -168,6 +193,9 @@ Tekitizy.prototype.nextPrevBtn = function () {
   return buttons
 }
 
+/*
+ * This function return the image container  for the html structure
+ */
 Tekitizy.prototype.createImageContainer = function () {
   var container
 
@@ -178,6 +206,9 @@ Tekitizy.prototype.createImageContainer = function () {
   return container
 }
 
+/*
+ * This function calcul the width of an image to have the good size
+ */
 Tekitizy.prototype.sizeWidth = function () {
   var tek = this
   var width = tek.$(window).width() / 2
@@ -187,7 +218,17 @@ Tekitizy.prototype.sizeWidth = function () {
   })
 }
 
-// EVENTS
+/*
+ *
+ *
+ * {EVENTS}
+ *
+ *
+ */
+
+ /*
+  * This function is the handler for all the click events
+  */
 Tekitizy.prototype.listenToButtons = function () {
   var tek = this
   // open
@@ -216,6 +257,9 @@ Tekitizy.prototype.listenToButtons = function () {
   this.responsiveWindow()
 }
 
+/*
+ * This function call the resize function each time the window is redimensionate
+ */
 Tekitizy.prototype.responsiveWindow = function () {
   var tek = this
 
@@ -224,17 +268,48 @@ Tekitizy.prototype.responsiveWindow = function () {
   })
 }
 
-// ACTIONS
+/*
+ *
+ *
+ * {ACTIONS}
+ *
+ *
+ */
 
-// affiche une image
-Tekitizy.prototype.actionShow = function (img, title, i) {
+ /*
+  * This functiion permits to play the tekitizy carousel
+  * with regular interval
+  */
+Tekitizy.prototype.playTekitizy = function () {
   var tek = this
 
-  this.nbImages = 0
+  if (tek.opts.autoPlay === true) {
+    tek.$('.tekitizy-play-btn').css('display', 'none')
+    tek.$('.tekitizy-pause-btn').css('display', 'inline-block')
+  } else {
+    tek.$('.tekitizy-play-btn').css('display', 'inline-block')
+    tek.$('.tekitizy-pause-btn').css('display', 'none')
+  }
+  setInterval(function () {
+    if (tek.nbImages) {
+      if (tek.opts.autoPlay === true) {
+        tek.actionNext()
+      }
+    }
+  }, tek.opts.imageDuration)
+}
+
+ /*
+  * This action is executed when a zoom button is pressed
+  */
+Tekitizy.prototype.actionShow = function (img, i) {
+  var tek = this
+
+  tek.nbImages = 0
   this.pos = i
   tek.$('.tekitizy-container2').each(function ($i) {
     var img = tek.$(this).children('img').attr('src')
-    var title = tek.$(this).children('img').attr('alt')
+    var title2 = tek.$(this).children('img').attr('alt')
     var image_container = '<figure class="tekitizy-image_container'
 
     if (i === $i.toString()) {
@@ -242,8 +317,7 @@ Tekitizy.prototype.actionShow = function (img, title, i) {
     }
     image_container += '" data-index="' + $i + '"><img src="' + img + '" class="tekitizy-image_content" >'
     if (tek.opts.title) {
-      console.log('OUI OUI OUI')
-      image_container += '<caption class="tekitizy-image_title">' + title + '</caption>'
+      image_container += '<p class="tekitizy-image_title">' + title2 + '</p>'
     }
     image_container += '</figure>'
     tek.$('.tekitizy-container_list').append(image_container)
@@ -257,33 +331,17 @@ Tekitizy.prototype.actionShow = function (img, title, i) {
   tek.$('.tekitizy-image_container').animate({ left: '-=' + width * (i) })
 }
 
-Tekitizy.prototype.playTekitizy = function () {
-  var tek = this
-
-  if (tek.opts.autoPlay === true) {
-    tek.$('.tekitizy-play-btn').css('display', 'none')
-    tek.$('.tekitizy-pause-btn').css('display', 'inline-block')
-  } else {
-    tek.$('.tekitizy-play-btn').css('display', 'inline-block')
-    tek.$('.tekitizy-pause-btn').css('display', 'none')
-  }
-
-  setInterval(function () {
-    if (tek.nbImages) {
-      if (tek.opts.autoPlay === true) {
-        tek.actionNext()
-      }
-    }
-  }, tek.opts.imageDuration)
-}
-
+/*
+ * Action execute when next button is pressed
+ * or when autoplay is on
+ */
 Tekitizy.prototype.actionNext = function () {
   var tek = this
   var current_img = tek.$('.image-active')
   var next_img
   var width = tek.$('.tekitizy-image_container').width()
 
-  if(current_img.attr('data-index') === (tek.nbImages - 1).toString()) {
+  if (current_img.attr('data-index') === (tek.nbImages - 1).toString()) {
     next_img = tek.$('.tekitizy-image_container').first()
     next_img.addClass('image-active')
     if (tek.opts.effect === true) {

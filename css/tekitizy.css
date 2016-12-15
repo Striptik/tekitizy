@@ -1,3 +1,10 @@
+/*
+ *  Dynamic Carousel Tekitizy
+ *  File : tekitizy.css
+ *  Author : Alexandre Simonin & Kevin Loiseleur
+ *  Licensed MIT
+ */
+
 .tekitizy-carroussel {
   display: none;
   position:fixed;
