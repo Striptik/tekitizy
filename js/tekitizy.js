@@ -54,7 +54,7 @@ Tekitizy.prototype.checkOpts = function (opts) {
     if (opts.hasOwnProperty('effect') && typeof opts.effect === 'boolean') {
       this.opts.effect = opts.effect
     } else {
-      this.opts.effect = false
+      this.opts.effect = true
     }
     if (opts.hasOwnProperty('thumbnails') && typeof opts.thumbnails === 'boolean') {
       this.opts.thumbnails = opts.thumbnails
@@ -233,7 +233,7 @@ Tekitizy.prototype.listenToButtons = function () {
   var tek = this
   // open
   tek.$('.tekitizy-open-btn').on('click', function () {
-    tek.actionShow(tek.$(this).attr('data-src'), tek.$(this).attr('data-alt'), tek.$(this).attr('data-index'))
+    tek.actionShow(tek.$(this).attr('data-src'), tek.$(this).attr('data-index'))
   })
   // play
   tek.$('.tekitizy-play-btn').on('click', function () {
